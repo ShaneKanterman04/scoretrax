@@ -36,7 +36,7 @@ export default function TeamPage({
   })).filter((g) => g.players.length > 0);
 
   return (
-    <main className="px-4 pt-3">
+    <main className="px-4 pt-safe">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{data.name}</h1>
         <FavoriteStar teamId={data.id} className="h-6 w-6" />

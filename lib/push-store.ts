@@ -1,8 +1,10 @@
 // Server-side store for push subscriptions and per-game notification
-// snapshots. Uses Upstash Redis when UPSTASH_REDIS_REST_URL/TOKEN are set;
-// otherwise falls back to an in-memory map (dev only — wiped on restart and
-// not shared across serverless instances).
+// snapshots. Defaults to a JSON file on disk (right fit for a single
+// self-hosted server process); set UPSTASH_REDIS_REST_URL/TOKEN to use
+// Upstash Redis instead (for serverless/multi-instance deployments).
 
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { Redis } from "@upstash/redis";
 
 export interface StoredSub {
@@ -26,7 +28,7 @@ export interface PushStore {
 }
 
 const SUBS_KEY = "push:subs";
-const GAME_TTL_SECS = 12 * 3600;
+const GAME_TTL_MS = 12 * 3600 * 1000;
 
 function upstashStore(): PushStore {
   const redis = Redis.fromEnv();
@@ -46,32 +48,84 @@ function upstashStore(): PushStore {
       return (await redis.get<GameSnapshot>(`push:game:${gamePk}`)) ?? null;
     },
     async setGameState(gamePk, snap) {
-      await redis.set(`push:game:${gamePk}`, snap, { ex: GAME_TTL_SECS });
+      await redis.set(`push:game:${gamePk}`, snap, {
+        ex: GAME_TTL_MS / 1000,
+      });
     },
   };
 }
 
-function memoryStore(): PushStore {
-  console.warn(
-    "[push-store] UPSTASH_REDIS_REST_URL not set — using in-memory store (dev only)"
-  );
-  const subs = new Map<string, StoredSub>();
-  const games = new Map<number, GameSnapshot>();
+interface FileData {
+  subs: Record<string, StoredSub>;
+  games: Record<string, { snap: GameSnapshot; ts: number }>;
+}
+
+function fileStore(): PushStore {
+  const path = resolve(process.env.PUSH_STORE_FILE ?? ".push-store.json");
+  let data: FileData | undefined;
+  // serialize all mutations so concurrent requests can't interleave writes
+  let queue: Promise<unknown> = Promise.resolve();
+
+  async function load(): Promise<FileData> {
+    if (data) return data;
+    try {
+      const parsed = JSON.parse(await readFile(path, "utf8"));
+      data = { subs: parsed.subs ?? {}, games: parsed.games ?? {} };
+    } catch {
+      data = { subs: {}, games: {} };
+    }
+    return data;
+  }
+
+  async function save() {
+    if (!data) return;
+    const cutoff = Date.now() - GAME_TTL_MS;
+    for (const [pk, entry] of Object.entries(data.games)) {
+      if (entry.ts < cutoff) delete data.games[pk];
+    }
+    await mkdir(dirname(path), { recursive: true });
+    const tmp = `${path}.tmp`;
+    await writeFile(tmp, JSON.stringify(data), "utf8");
+    await rename(tmp, path);
+  }
+
+  function enqueue<T>(fn: () => Promise<T>): Promise<T> {
+    const next = queue.then(fn);
+    queue = next.catch(() => {});
+    return next;
+  }
+
   return {
-    async upsertSub(sub) {
-      subs.set(sub.endpoint, sub);
+    upsertSub(sub) {
+      return enqueue(async () => {
+        const d = await load();
+        d.subs[sub.endpoint] = sub;
+        await save();
+      });
     },
-    async deleteSub(endpoint) {
-      subs.delete(endpoint);
+    deleteSub(endpoint) {
+      return enqueue(async () => {
+        const d = await load();
+        delete d.subs[endpoint];
+        await save();
+      });
     },
-    async listSubs() {
-      return [...subs.values()];
+    listSubs() {
+      return enqueue(async () => Object.values((await load()).subs));
     },
-    async getGameState(gamePk) {
-      return games.get(gamePk) ?? null;
+    getGameState(gamePk) {
+      return enqueue(async () => {
+        const entry = (await load()).games[String(gamePk)];
+        if (!entry || entry.ts < Date.now() - GAME_TTL_MS) return null;
+        return entry.snap;
+      });
     },
-    async setGameState(gamePk, snap) {
-      games.set(gamePk, snap);
+    setGameState(gamePk, snap) {
+      return enqueue(async () => {
+        const d = await load();
+        d.games[String(gamePk)] = { snap, ts: Date.now() };
+        await save();
+      });
     },
   };
 }
@@ -83,7 +137,7 @@ export function getPushStore(): PushStore {
     store =
       process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
         ? upstashStore()
-        : memoryStore();
+        : fileStore();
   }
   return store;
 }

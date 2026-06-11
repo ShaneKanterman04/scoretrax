@@ -34,7 +34,7 @@ export default function ScoresPage() {
   );
 
   return (
-    <main className="px-4 pt-3">
+    <main className="px-4 pt-safe">
       <h1 className="pb-1 text-2xl font-bold">Scores</h1>
       <DateNav date={date} onChange={setDate} />
       <MyTeamsStrip />

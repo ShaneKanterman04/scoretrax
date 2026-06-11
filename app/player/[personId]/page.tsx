@@ -24,7 +24,7 @@ export default function PlayerPage({
   const logCols = data.gameLog[0] ? Object.keys(data.gameLog[0].line) : [];
 
   return (
-    <main className="px-4 pt-3">
+    <main className="px-4 pt-safe">
       <h1 className="text-2xl font-bold">{data.name}</h1>
       <div className="mt-0.5 text-sm text-muted">
         #{data.number ?? "—"} · {data.pos}

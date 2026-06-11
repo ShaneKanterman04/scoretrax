@@ -9,13 +9,21 @@ Mobile-first PWA for following live MLB games: scores, live at-bats with pitch p
 - **Standings** — divisions plus the wild card race with WCGB, elimination numbers, and clinch badges
 - **Push notifications** — game start / lead change / final alerts for your favorite teams (see setup below)
 
-## Push notification setup
+## Self-hosting
 
-Push needs VAPID keys, a cron trigger, and (in production) a small Redis store:
+```bash
+npm install
+npm run build
+npm start          # long-running server, e.g. behind nginx/caddy + systemd
+```
 
-1. Generate keys: `npx web-push generate-vapid-keys`, then fill in `.env` values per `.env.example` (`NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET`).
-2. Production storage: create an Upstash Redis database (Vercel Marketplace) and set `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`. Without it, subscriptions live in memory — fine for local dev only.
-3. Trigger: `vercel.json` declares a per-minute cron for `/api/cron/notify`. **Vercel Hobby crons only run once per day**, which is useless for live alerts — on Hobby, point an external pinger (GitHub Actions schedule, cron-job.org, etc.) at `https://<your-app>/api/cron/notify` with header `Authorization: Bearer <CRON_SECRET>` every 1–2 minutes instead.
+Web push requires a secure context, so serve the app over HTTPS (a reverse proxy with a Let's Encrypt cert is the usual setup).
+
+### Push notifications
+
+1. Generate keys: `npx web-push generate-vapid-keys`, then set `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, and `VAPID_SUBJECT` per `.env.example` (note: the public key is inlined at build time, so rebuild after changing it).
+2. That's it — with keys present, the server polls the MLB schedule every 60 s in-process (`instrumentation.ts`) and notifies subscribers on game start, lead changes, and finals. Tune with `PUSH_POLL_SECONDS`, or set it to `0` and hit `GET /api/cron/notify` with `Authorization: Bearer <CRON_SECRET>` from an external cron instead.
+3. Subscriptions persist in a JSON file (`.push-store.json` next to the app by default; override with `PUSH_STORE_FILE`). Setting `UPSTASH_REDIS_REST_URL`/`TOKEN` switches to Upstash Redis for serverless or multi-instance deployments.
 4. iOS requires the installed PWA (Add to Home Screen, iOS 16.4+) for web push; enable alerts via the bell on the Teams page.
 
 ---

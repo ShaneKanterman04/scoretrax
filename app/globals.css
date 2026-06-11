@@ -30,6 +30,12 @@ html {
   background: var(--background);
 }
 
+/* top padding that clears the iOS status bar / Dynamic Island in standalone
+   PWA mode (viewport-fit=cover lets content extend under it) */
+.pt-safe {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
+}
+
 /* live game event flash: pop in, hold, fade out */
 @keyframes event-flash {
   0% {

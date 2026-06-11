@@ -14,7 +14,7 @@ export default function TeamsPage() {
       a.name.localeCompare(b.name)
   );
   return (
-    <main className="px-4 pt-3">
+    <main className="px-4 pt-safe">
       <div className="flex items-center justify-between pb-2">
         <h1 className="text-2xl font-bold">Teams</h1>
         <NotificationToggle />

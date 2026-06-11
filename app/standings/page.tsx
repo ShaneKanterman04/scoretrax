@@ -37,7 +37,7 @@ export default function StandingsPage() {
   const wildCard = data?.wildCards?.find((w) => w.league === league);
 
   return (
-    <main className="px-4 pt-3">
+    <main className="px-4 pt-safe">
       <h1 className="pb-2 text-2xl font-bold">Standings</h1>
       <Tabs tabs={["AL", "NL"]} active={league} onChange={setLeague} />
       {!data && <div className="py-16 text-center text-sm text-muted">Loading…</div>}

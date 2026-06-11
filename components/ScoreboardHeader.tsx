@@ -20,7 +20,7 @@ export default function ScoreboardHeader({ game, date }: { game: LiveGame; date:
   const { away, home } = game.teams;
   const rhe = game.linescore.rhe;
   return (
-    <div className="sticky top-0 z-40 border-b border-edge bg-background/95 px-4 pb-2 pt-3 backdrop-blur">
+    <div className="sticky top-0 z-40 border-b border-edge bg-background/95 px-4 pb-2 pt-safe backdrop-blur">
       <div className="mx-auto max-w-lg">
         <div className="flex items-center justify-between">
           <div className="flex-1 text-center">
