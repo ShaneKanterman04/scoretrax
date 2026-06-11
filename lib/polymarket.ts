@@ -9,6 +9,7 @@ import { teamByAbbr } from "./teams";
 import type { MarketOdds } from "./types";
 
 const GAMMA = "https://gamma-api.polymarket.com";
+const CLOB = "https://clob.polymarket.com";
 
 const NOT_FOUND: MarketOdds = { matched: false };
 
@@ -32,9 +33,11 @@ function extractMoneyline(event: any, awayAbbr: string, homeAbbr: string): Marke
 
   let outcomes: string[];
   let prices: number[];
+  let tokenIds: string[] = [];
   try {
     outcomes = JSON.parse(market.outcomes);
     prices = JSON.parse(market.outcomePrices).map(Number);
+    tokenIds = market.clobTokenIds ? JSON.parse(market.clobTokenIds) : [];
   } catch {
     return NOT_FOUND;
   }
@@ -72,6 +75,8 @@ function extractMoneyline(event: any, awayAbbr: string, homeAbbr: string): Marke
     matched: true,
     awayProb,
     homeProb,
+    awayTokenId: tokenIds[awayIdx],
+    homeTokenId: tokenIds[homeIdx],
     awayLabel: awayAbbr,
     homeLabel: homeAbbr,
     volume24hr: Number(market.volume24hr) || undefined,
@@ -80,6 +85,15 @@ function extractMoneyline(event: any, awayAbbr: string, homeAbbr: string): Marke
 }
 
 export async function fetchGameOdds(
+  awayAbbr: string,
+  homeAbbr: string,
+  date: string,
+  gameNumber = 1
+): Promise<MarketOdds> {
+  return fetchGameMarket(awayAbbr, homeAbbr, date, gameNumber);
+}
+
+export async function fetchGameMarket(
   awayAbbr: string,
   homeAbbr: string,
   date: string,
@@ -115,4 +129,34 @@ export async function fetchGameOdds(
     // network/API failure -> degrade silently
   }
   return NOT_FOUND;
+}
+
+export async function fetchHistoricalTokenPrice(
+  tokenId: string,
+  targetTs: number,
+  lookbackHours = 24
+): Promise<number | undefined> {
+  const startTs = targetTs - lookbackHours * 60 * 60;
+  const params = new URLSearchParams({
+    market: tokenId,
+    startTs: String(startTs),
+    endTs: String(targetTs),
+    fidelity: "60",
+  });
+  try {
+    const res = await fetch(`${CLOB}/prices-history?${params}`, {
+      next: { revalidate: 86400 },
+    });
+    if (!res.ok) return undefined;
+    const data = await res.json();
+    const history = Array.isArray(data.history) ? data.history : [];
+    const points = history
+      .map((point: any) => ({ t: Number(point.t), p: Number(point.p) }))
+      .filter((point: { t: number; p: number }) => Number.isFinite(point.t) && Number.isFinite(point.p))
+      .filter((point: { t: number; p: number }) => point.t <= targetTs)
+      .sort((a: { t: number }, b: { t: number }) => a.t - b.t);
+    return points.at(-1)?.p;
+  } catch {
+    return undefined;
+  }
 }

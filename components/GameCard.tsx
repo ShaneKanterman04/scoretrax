@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ScheduleGame, ScheduleTeam } from "@/lib/types";
 import { formatGameTime } from "@/lib/fetcher";
+import type { RedZoneSignal } from "@/lib/redzone";
 import BasesDiamond from "./BasesDiamond";
 import GameStar from "./GameStar";
 import OddsChip from "./OddsChip";
@@ -29,7 +30,13 @@ function TeamRow({ team, winner, live }: { team: ScheduleTeam; winner?: boolean;
   );
 }
 
-export default function GameCard({ game }: { game: ScheduleGame }) {
+export default function GameCard({
+  game,
+  redZone,
+}: {
+  game: ScheduleGame;
+  redZone?: RedZoneSignal;
+}) {
   const { state } = game;
   const awayWon =
     state === "Final" ? (game.away.score ?? 0) > (game.home.score ?? 0) : undefined;
@@ -46,6 +53,17 @@ export default function GameCard({ game }: { game: ScheduleGame }) {
           winner={awayWon === undefined ? undefined : !awayWon}
           live={state === "Live"}
         />
+        {redZone && (
+          <div className="mt-1 flex min-w-0 items-center gap-1.5">
+            <span className="rounded bg-live/15 px-1.5 py-0.5 text-[10px] font-bold text-live">
+              RZ {redZone.score}
+            </span>
+            <span className="truncate text-[10px] font-medium text-muted">
+              {redZone.label}
+              {redZone.reasons.length > 0 ? ` · ${redZone.reasons.join(" · ")}` : ""}
+            </span>
+          </div>
+        )}
       </div>
       <GameStar gamePk={game.gamePk} officialDate={game.officialDate} />
       <div className="flex w-28 shrink-0 flex-col items-end justify-center gap-1 border-l border-edge pl-3 text-right">

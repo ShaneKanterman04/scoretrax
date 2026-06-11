@@ -37,6 +37,7 @@ export default function ScoreboardHeader({ game, date }: { game: LiveGame; date:
               away={away.abbr}
               home={home.abbr}
               date={date}
+              gameNumber={game.gameNumber}
               live={live}
             />
           </div>

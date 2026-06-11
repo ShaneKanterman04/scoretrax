@@ -38,6 +38,44 @@ export function fetchStandings(season: number) {
   );
 }
 
+export function fetchPitcherSeasonStats(personId: string | number, season: number) {
+  return mlbFetch<any>(
+    `/api/v1/people/${personId}?hydrate=stats(group=[pitching],type=[season],season=${season})`,
+    3600
+  );
+}
+
+export function fetchPitcherStatsRange(
+  personId: string | number,
+  season: number,
+  startDate: string,
+  endDate: string
+) {
+  return mlbFetch<any>(
+    `/api/v1/people/${personId}/stats?stats=byDateRange&group=pitching&season=${season}&startDate=${startDate}&endDate=${endDate}`,
+    86400
+  );
+}
+
+export function fetchTeamSeasonStats(teamId: string | number, season: number) {
+  return mlbFetch<any>(
+    `/api/v1/teams/${teamId}/stats?stats=season&group=hitting,pitching&season=${season}`,
+    3600
+  );
+}
+
+export function fetchTeamStatsRange(
+  teamId: string | number,
+  season: number,
+  startDate: string,
+  endDate: string
+) {
+  return mlbFetch<any>(
+    `/api/v1/teams/${teamId}/stats?stats=byDateRange&group=hitting,pitching&season=${season}&startDate=${startDate}&endDate=${endDate}`,
+    86400
+  );
+}
+
 export function fetchTeam(teamId: string | number) {
   return mlbFetch<any>(`/api/v1/teams/${teamId}`, 600);
 }

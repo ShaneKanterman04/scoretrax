@@ -27,6 +27,17 @@ const TABS = [
     ),
   },
   {
+    href: "/intel",
+    label: "Intel",
+    match: (p: string) => p.startsWith("/intel"),
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M4 17 9 8l4 6 3-5 4 8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M4 20h16" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
     href: "/teams",
     label: "Teams",
     match: (p: string) => p.startsWith("/teams") || p.startsWith("/team/"),

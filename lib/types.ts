@@ -105,6 +105,7 @@ export interface LiveGame {
   decisions?: { winner?: string; loser?: string; save?: string };
   gameDate: string;
   officialDate: string; // YYYY-MM-DD
+  gameNumber: number;
   venue?: string;
 }
 
@@ -245,10 +246,64 @@ export interface MarketOdds {
   matched: boolean;
   awayProb?: number; // 0..1
   homeProb?: number;
+  awayTokenId?: string;
+  homeTokenId?: string;
   awayLabel?: string;
   homeLabel?: string;
   volume24hr?: number;
   title?: string;
+}
+
+export type BestBetSide = "away" | "home";
+export type BestBetConfidence = "Strong" | "Standard" | "Lean";
+
+export interface BestBetRecommendation {
+  gamePk: number;
+  officialDate: string;
+  gameDate: string;
+  gameNumber: number;
+  venue: string;
+  away: { id: number; abbr: string; name: string; probablePitcher?: string };
+  home: { id: number; abbr: string; name: string; probablePitcher?: string };
+  pick: BestBetSide;
+  pickTeamId: number;
+  pickAbbr: string;
+  opponentAbbr: string;
+  modelProb: number; // 0..1
+  marketProb: number; // 0..1
+  edge: number; // modelProb - marketProb
+  score: number;
+  confidence: BestBetConfidence;
+  reasons: string[];
+}
+
+export interface BestBetsResponse {
+  date: string;
+  generatedAt: string;
+  candidatesEvaluated: number;
+  topPick: BestBetRecommendation | null;
+  alternates: BestBetRecommendation[];
+  noPickReason?: string;
+}
+
+export interface BestBetBacktestPick extends BestBetRecommendation {
+  result: "won" | "lost" | "void";
+  finalScore: { away: number; home: number };
+  profit: number;
+}
+
+export interface BestBetBacktestResponse {
+  startDate: string;
+  endDate: string;
+  generatedAt: string;
+  daysTested: number;
+  picks: BestBetBacktestPick[];
+  skippedDays: { date: string; reason: string }[];
+  record: { wins: number; losses: number; voids: number };
+  roi: number;
+  averageEdge: number;
+  averageMarketProb: number;
+  averageModelProb: number;
 }
 
 export type LegResult = "pending" | "won" | "lost" | "void";

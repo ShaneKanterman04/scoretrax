@@ -230,6 +230,7 @@ export function transformLiveFeed(raw: any): LiveGame {
     decisions,
     gameDate: gd.datetime?.dateTime ?? "",
     officialDate: gd.datetime?.officialDate ?? (gd.datetime?.dateTime ?? "").slice(0, 10),
+    gameNumber: gd.game?.gameNumber ?? gd.game?.number ?? 1,
     venue: gd.venue?.name,
   };
 }

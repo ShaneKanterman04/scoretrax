@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
+import BestBetBacktestCard from "@/components/BestBetBacktestCard";
+import BestBetCard from "@/components/BestBetCard";
 import BetCard from "@/components/BetCard";
 import BetStats from "@/components/BetStats";
 import Tabs from "@/components/Tabs";
@@ -87,6 +89,8 @@ export default function BetsPage() {
           New Bet
         </Link>
       </div>
+      <BestBetCard />
+      <BestBetBacktestCard />
       <BetStats bets={bets} />
       <Tabs tabs={["Open", "Settled"]} active={tab} onChange={setTab} />
       <div className="mt-2 flex flex-col gap-2">

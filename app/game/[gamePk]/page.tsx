@@ -7,12 +7,14 @@ import BoxScoreTable from "@/components/BoxScoreTable";
 import CountDots from "@/components/CountDots";
 import EventFlash from "@/components/EventFlash";
 import LineScore from "@/components/LineScore";
+import MarketRealityPanel from "@/components/MarketRealityPanel";
 import MatchupCard from "@/components/MatchupCard";
 import PitchList from "@/components/PitchList";
 import PitchZonePlot from "@/components/PitchZonePlot";
 import PlaysFeed from "@/components/PlaysFeed";
 import ScoreboardHeader from "@/components/ScoreboardHeader";
 import Tabs from "@/components/Tabs";
+import WhatChangedPanel from "@/components/WhatChangedPanel";
 import WinProbChart from "@/components/WinProbChart";
 import { fetcher } from "@/lib/fetcher";
 import type { BoxScore, LiveGame, WinProbSeries } from "@/lib/types";
@@ -49,6 +51,7 @@ function WinProbSection({ game }: { game: LiveGame }) {
           awayAbbr={game.teams.away.abbr}
           homeAbbr={game.teams.home.abbr}
         />
+        <MarketRealityPanel game={game} winProb={data} />
       </div>
     </>
   );
@@ -195,6 +198,7 @@ export default function GamePage({
     <main className="relative">
       <EventFlash game={game} />
       <ScoreboardHeader game={game} date={date} />
+      <WhatChangedPanel game={game} />
       <div className="px-4 pt-3">
         <Tabs tabs={["Live", "Box", "Plays"]} active={tab} onChange={setTab} />
       </div>
