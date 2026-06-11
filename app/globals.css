@@ -1,26 +1,65 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  --surface: #161618;
+  --surface-2: #1f1f23;
+  --border: #2a2a30;
+  --foreground: #ededed;
+  --muted: #8b8b94;
+  --accent: #3b82f6;
+  --live: #ef4444;
+  --good: #22c55e;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-edge: var(--border);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-live: var(--live);
+  --color-good: var(--good);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  background: var(--background);
+}
+
+/* live game event flash: pop in, hold, fade out */
+@keyframes event-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
   }
+  12% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  20% {
+    transform: scale(1);
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+.animate-event-flash {
+  animation: event-flash 1.4s ease-out forwards;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
 }

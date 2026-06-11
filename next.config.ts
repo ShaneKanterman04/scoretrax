@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Allow phones on the LAN to reach dev assets/HMR websocket.
+  allowedDevOrigins: ["10.0.0.*", "192.168.*.*"],
 };
 
 export default nextConfig;

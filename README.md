@@ -1,3 +1,25 @@
+# ScoreTrax
+
+Mobile-first PWA for following live MLB games: scores, live at-bats with pitch plots, win probability, box scores, standings with the playoff race, team/player pages, and Polymarket win odds. Built with Next.js (App Router), React, Tailwind, and SWR over the public MLB Stats API — no database required for the core app.
+
+## Features
+
+- **Scores** — date-navigable game list with live updates; star teams and pin individual games to keep them on top
+- **Live game view** — bases/count, pitch-by-pitch strike zone plot, batter vs. pitcher career head-to-head with hot/cold zones, win probability chart, animated event flashes (hit/run/out/strike/ball), box score, and full play-by-play
+- **Standings** — divisions plus the wild card race with WCGB, elimination numbers, and clinch badges
+- **Push notifications** — game start / lead change / final alerts for your favorite teams (see setup below)
+
+## Push notification setup
+
+Push needs VAPID keys, a cron trigger, and (in production) a small Redis store:
+
+1. Generate keys: `npx web-push generate-vapid-keys`, then fill in `.env` values per `.env.example` (`NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET`).
+2. Production storage: create an Upstash Redis database (Vercel Marketplace) and set `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`. Without it, subscriptions live in memory — fine for local dev only.
+3. Trigger: `vercel.json` declares a per-minute cron for `/api/cron/notify`. **Vercel Hobby crons only run once per day**, which is useless for live alerts — on Hobby, point an external pinger (GitHub Actions schedule, cron-job.org, etc.) at `https://<your-app>/api/cron/notify` with header `Authorization: Bearer <CRON_SECRET>` every 1–2 minutes instead.
+4. iOS requires the installed PWA (Add to Home Screen, iOS 16.4+) for web push; enable alerts via the bell on the Teams page.
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
