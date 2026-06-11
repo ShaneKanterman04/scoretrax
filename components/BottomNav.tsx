@@ -36,6 +36,17 @@ const TABS = [
       </svg>
     ),
   },
+  {
+    href: "/bets",
+    label: "Bets",
+    match: (p: string) => p.startsWith("/bets"),
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.5a2.5 2.5 0 0 0 0 5V16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.5a2.5 2.5 0 0 0 0-5V8Z" />
+        <path d="M14 7.5v1.5M14 11.25v1.5M14 15v1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
 ];
 
 export default function BottomNav() {

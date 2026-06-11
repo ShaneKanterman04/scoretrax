@@ -250,3 +250,27 @@ export interface MarketOdds {
   volume24hr?: number;
   title?: string;
 }
+
+export type LegResult = "pending" | "won" | "lost" | "void";
+export type BetStatus = "open" | "won" | "lost" | "void";
+
+export interface BetLeg {
+  gamePk: number;
+  officialDate: string; // YYYY-MM-DD, used for settlement schedule lookup
+  gameNumber: number; // doubleheader disambiguation for the Polymarket slug
+  awayAbbr: string;
+  homeAbbr: string;
+  pick: "away" | "home";
+  pickTeamId: number;
+  entryProb?: number; // 0..1 Polymarket implied prob at entry; undefined if unmatched
+  result: LegResult;
+  finalScore?: { away: number; home: number };
+}
+
+export interface Bet {
+  id: string;
+  createdAt: string; // ISO
+  legs: BetLeg[]; // 1..N (parlay when >1)
+  status: BetStatus;
+  settledAt?: string;
+}
