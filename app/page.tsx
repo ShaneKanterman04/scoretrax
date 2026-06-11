@@ -21,9 +21,13 @@ export default function ScoresPage() {
     `/api/mlb/schedule?date=${date}`,
     fetcher,
     {
-      refreshInterval: (latest) =>
-        latest?.games?.some((g) => g.state === "Live") ? 30_000 : 60_000,
+      refreshInterval: (latest) => {
+        if (latest?.games?.some((g) => g.state === "Live")) return 10_000;
+        return date === todayLocal() ? 30_000 : 0;
+      },
       keepPreviousData: true,
+      dedupingInterval: 2_000,
+      focusThrottleInterval: 5_000,
     }
   );
 

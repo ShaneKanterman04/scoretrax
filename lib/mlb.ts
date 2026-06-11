@@ -13,7 +13,7 @@ export async function mlbFetch<T>(path: string, revalidate: number | false): Pro
   return res.json() as Promise<T>;
 }
 
-export function fetchSchedule(date: string, revalidate: number) {
+export function fetchSchedule(date: string, revalidate: number | false) {
   return mlbFetch<any>(
     `/api/v1/schedule?sportId=1&date=${date}&hydrate=probablePitcher,linescore`,
     revalidate
