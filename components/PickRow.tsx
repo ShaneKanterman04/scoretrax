@@ -6,12 +6,12 @@ import type { MarketOdds, ScheduleGame, ScheduleTeam } from "@/lib/types";
 
 function SideButton({
   team,
-  prob,
+  value,
   selected,
   onTap,
 }: {
   team: ScheduleTeam;
-  prob?: number;
+  value: string;
   selected: boolean;
   onTap: () => void;
 }) {
@@ -29,9 +29,7 @@ function SideButton({
           {team.record}
         </span>
       </span>
-      <span className="tabular-nums">
-        {prob !== undefined ? `${Math.round(prob * 100)}%` : "—"}
-      </span>
+      <span className="tabular-nums">{value}</span>
     </button>
   );
 }
@@ -45,13 +43,25 @@ export default function PickRow({
   pick?: "away" | "home";
   onPick: (side: "away" | "home", entryProb?: number) => void;
 }) {
+  // Finished games can still be picked (backfilling a forgotten bet), but a
+  // resolved market's price is ~100/0 — useless as entry odds, so skip the
+  // fetch and record no entryProb; settlement grades the leg right away.
+  const isFinal = game.state === "Final";
   const { data } = useSWR<MarketOdds>(
-    `/api/polymarket/game?away=${game.away.abbr}&home=${game.home.abbr}&date=${game.officialDate}&gameNumber=${game.gameNumber}`,
+    isFinal
+      ? null
+      : `/api/polymarket/game?away=${game.away.abbr}&home=${game.home.abbr}&date=${game.officialDate}&gameNumber=${game.gameNumber}`,
     fetcher,
     { refreshInterval: 0, revalidateOnFocus: false }
   );
   const awayProb = data?.matched ? data.awayProb : undefined;
   const homeProb = data?.matched ? data.homeProb : undefined;
+  const value = (prob?: number, score?: number) =>
+    isFinal
+      ? String(score ?? "—")
+      : prob !== undefined
+        ? `${Math.round(prob * 100)}%`
+        : "—";
 
   return (
     <div className="rounded-xl bg-surface p-3">
@@ -65,6 +75,8 @@ export default function PickRow({
             <span className="font-bold text-live">
               {game.isTop ? "▲" : "▼"} {game.inningOrdinal} · {game.away.score}-{game.home.score}
             </span>
+          ) : isFinal ? (
+            <span className="font-bold">{game.detailedState}</span>
           ) : (
             formatGameTime(game.gameDate)
           )}
@@ -73,13 +85,13 @@ export default function PickRow({
       <div className="flex gap-2">
         <SideButton
           team={game.away}
-          prob={awayProb}
+          value={value(awayProb, game.away.score)}
           selected={pick === "away"}
           onTap={() => onPick("away", awayProb)}
         />
         <SideButton
           team={game.home}
-          prob={homeProb}
+          value={value(homeProb, game.home.score)}
           selected={pick === "home"}
           onTap={() => onPick("home", homeProb)}
         />

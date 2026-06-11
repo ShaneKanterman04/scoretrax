@@ -22,7 +22,9 @@ export default function NewBetPage() {
     { keepPreviousData: true }
   );
 
-  const games = (data?.games ?? []).filter((g) => g.state !== "Final");
+  // Final games stay pickable so a forgotten bet can be backfilled; the
+  // settler grades those legs as soon as the bet is placed.
+  const games = data?.games ?? [];
 
   function togglePick(game: ScheduleGame, side: "away" | "home", entryProb?: number) {
     setSlip((prev) => {
@@ -64,7 +66,7 @@ export default function NewBetPage() {
         )}
         {data && games.length === 0 && (
           <div className="py-16 text-center text-sm text-muted">
-            No games left to pick on this date.
+            No games on this date.
           </div>
         )}
         {games.map((g) => (
