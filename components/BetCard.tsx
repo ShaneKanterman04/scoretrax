@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { combinedProb, deleteBet } from "@/lib/bets";
@@ -50,7 +51,10 @@ function LegRow({
   const liveProb = legLiveProb(leg, odds);
 
   return (
-    <div className="flex items-center justify-between py-1.5">
+    <Link
+      href={`/game/${leg.gamePk}`}
+      className="-mx-1 flex items-center justify-between rounded px-1 py-1.5 active:bg-surface-2"
+    >
       <div className="flex items-baseline gap-2">
         <span className="text-sm font-bold">{pickAbbr} ML</span>
         <span className="text-[11px] text-muted">
@@ -98,7 +102,7 @@ function LegRow({
           )}
         </span>
       )}
-    </div>
+    </Link>
   );
 }
 
@@ -180,6 +184,10 @@ export default function BetCard({
                 </span>
               )}
               {liveCombined !== undefined ? pct(liveCombined) : "—"}
+            </span>
+          ) : entryCombined !== undefined ? (
+            <span className="text-sm tabular-nums text-muted">
+              entry {pct(entryCombined)}
             </span>
           ) : (
             <span className="text-sm font-bold capitalize">{bet.status}</span>

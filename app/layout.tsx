@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import BetSettlement from "@/components/BetSettlement";
 import BottomNav from "@/components/BottomNav";
 import RegisterSW from "@/components/RegisterSW";
 
@@ -48,6 +49,7 @@ export default function RootLayout({
       <body className="min-h-full">
         <div className="mx-auto min-h-screen max-w-lg pb-24">{children}</div>
         <BottomNav />
+        <BetSettlement />
         <RegisterSW />
       </body>
     </html>

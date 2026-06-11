@@ -127,6 +127,54 @@ export function combinedProb(
   return product;
 }
 
+export interface BetRecord {
+  wins: number;
+  losses: number;
+  voids: number;
+  legWins: number;
+  legLosses: number;
+  winRate?: number; // wins / (wins + losses)
+  streak?: { result: "won" | "lost"; count: number };
+  longestShot?: number; // lowest entry combined prob among won bets
+}
+
+export function betStats(bets: Bet[]): BetRecord {
+  const stats: BetRecord = { wins: 0, losses: 0, voids: 0, legWins: 0, legLosses: 0 };
+  for (const bet of bets) {
+    if (bet.status === "won") stats.wins++;
+    else if (bet.status === "lost") stats.losses++;
+    else if (bet.status === "void") stats.voids++;
+    for (const leg of bet.legs) {
+      if (leg.result === "won") stats.legWins++;
+      else if (leg.result === "lost") stats.legLosses++;
+    }
+    if (bet.status === "won") {
+      const entry = combinedProb(bet.legs.map((l) => l.entryProb));
+      if (entry !== undefined) {
+        stats.longestShot =
+          stats.longestShot === undefined ? entry : Math.min(stats.longestShot, entry);
+      }
+    }
+  }
+  const decided = stats.wins + stats.losses;
+  if (decided > 0) stats.winRate = stats.wins / decided;
+  const recent = bets
+    .filter((b) => b.status === "won" || b.status === "lost")
+    .sort((a, b) =>
+      (b.settledAt ?? b.createdAt).localeCompare(a.settledAt ?? a.createdAt)
+    );
+  if (recent.length > 0) {
+    const result = recent[0].status as "won" | "lost";
+    let count = 0;
+    for (const b of recent) {
+      if (b.status !== result) break;
+      count++;
+    }
+    stats.streak = { result, count };
+  }
+  return stats;
+}
+
 // Grade pending legs whose officialDate matches `date` against that day's
 // schedule. Idempotent and change-gated, so it's safe to call on every SWR
 // revalidation without write churn.

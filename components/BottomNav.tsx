@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useBets } from "@/lib/bets";
 
 const TABS = [
   {
@@ -51,6 +52,8 @@ const TABS = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { bets } = useBets();
+  const openBets = bets.filter((b) => b.status === "open").length;
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-50 border-t border-edge bg-surface/95 backdrop-blur"
@@ -67,7 +70,14 @@ export default function BottomNav() {
                 active ? "text-accent" : "text-muted"
               }`}
             >
-              {tab.icon}
+              <span className="relative">
+                {tab.icon}
+                {tab.href === "/bets" && openBets > 0 && (
+                  <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-white">
+                    {openBets}
+                  </span>
+                )}
+              </span>
               {tab.label}
             </Link>
           );

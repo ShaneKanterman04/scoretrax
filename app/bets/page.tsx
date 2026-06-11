@@ -4,15 +4,16 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import BetCard from "@/components/BetCard";
+import BetStats from "@/components/BetStats";
 import Tabs from "@/components/Tabs";
 import { fetcher } from "@/lib/fetcher";
-import { settleFromSchedule, useBets } from "@/lib/bets";
+import { useBets } from "@/lib/bets";
 import type { ScheduleDay, ScheduleGame } from "@/lib/types";
 
-// Polls one date's schedule while the page is open: settles pending legs and
-// reports the games up for live-state display. One instance per pending date
-// keeps hook counts stable.
-function ScheduleSettler({
+// Watches one date's schedule and reports its games up for live-state
+// display on bet cards. Settlement itself runs globally in BetSettlement
+// (mounted in the layout); SWR dedupes the shared schedule fetch.
+function ScheduleWatcher({
   date,
   onGames,
 }: {
@@ -25,10 +26,7 @@ function ScheduleSettler({
     keepPreviousData: true,
   });
   useEffect(() => {
-    if (data?.games) {
-      settleFromSchedule(date, data.games);
-      onGames(date, data.games);
-    }
+    if (data?.games) onGames(date, data.games);
   }, [date, data, onGames]);
   return null;
 }
@@ -66,14 +64,19 @@ export default function BetsPage() {
     [gamesByDate]
   );
 
-  const shown = bets.filter((b) =>
-    tab === "Open" ? b.status === "open" : b.status !== "open"
-  );
+  const shown =
+    tab === "Open"
+      ? bets.filter((b) => b.status === "open")
+      : bets
+          .filter((b) => b.status !== "open")
+          .sort((a, b) =>
+            (b.settledAt ?? b.createdAt).localeCompare(a.settledAt ?? a.createdAt)
+          );
 
   return (
     <main className="px-4 pt-safe">
       {pendingDates.map((date) => (
-        <ScheduleSettler key={date} date={date} onGames={onGames} />
+        <ScheduleWatcher key={date} date={date} onGames={onGames} />
       ))}
       <div className="flex items-center justify-between pb-2">
         <h1 className="text-2xl font-bold">Bets</h1>
@@ -84,6 +87,7 @@ export default function BetsPage() {
           New Bet
         </Link>
       </div>
+      <BetStats bets={bets} />
       <Tabs tabs={["Open", "Settled"]} active={tab} onChange={setTab} />
       <div className="mt-2 flex flex-col gap-2">
         {shown.length === 0 && (
