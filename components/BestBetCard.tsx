@@ -4,6 +4,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { addBet } from "@/lib/bets";
 import { fetcher, formatGameTime, todayLocal } from "@/lib/fetcher";
+import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
 import type { BestBetRecommendation, BestBetsResponse } from "@/lib/types";
 
 function pct(value: number): string {
@@ -58,7 +59,7 @@ export default function BestBetCard() {
   const { data, isLoading } = useSWR<BestBetsResponse>(
     `/api/bets/best?date=${date}`,
     fetcher,
-    { refreshInterval: 300_000, revalidateOnFocus: false }
+    { refreshInterval: VISIBLE_REFRESH_MS, revalidateOnFocus: false }
   );
   const top = data?.topPick;
 

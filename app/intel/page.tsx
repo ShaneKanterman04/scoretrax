@@ -8,6 +8,7 @@ import HelpModal from "@/components/HelpModal";
 import Tabs from "@/components/Tabs";
 import { fetcher, formatGameTime, todayLocal } from "@/lib/fetcher";
 import { getMarketGap, getPressureSignal } from "@/lib/live-intel";
+import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
 import type { LiveGame, MarketOdds, ScheduleDay, ScheduleGame, WinProbSeries } from "@/lib/types";
 
 function inningLabel(game: LiveGame): string {
@@ -28,7 +29,7 @@ function useLiveIntel(date: string) {
     `/api/mlb/schedule?date=${date}`,
     fetcher,
     {
-      refreshInterval: 30_000,
+      refreshInterval: VISIBLE_REFRESH_MS,
       keepPreviousData: true,
     }
   );
@@ -52,7 +53,7 @@ function useLiveIntel(date: string) {
       Promise.all(
         liveSchedule.map((game) => fetcher(`/api/mlb/game/${game.gamePk}/live`))
       ),
-    { refreshInterval: 8_000, keepPreviousData: true }
+    { refreshInterval: VISIBLE_REFRESH_MS, keepPreviousData: true }
   );
 
   const { data: winProbs } = useSWR<(WinProbSeries | undefined)[]>(
@@ -63,7 +64,7 @@ function useLiveIntel(date: string) {
           fetcher(`/api/mlb/game/${game.gamePk}/winprob`).catch(() => undefined)
         )
       ),
-    { refreshInterval: 30_000, keepPreviousData: true }
+    { refreshInterval: VISIBLE_REFRESH_MS, keepPreviousData: true }
   );
 
   const { data: odds } = useSWR<(MarketOdds | undefined)[]>(
@@ -80,7 +81,7 @@ function useLiveIntel(date: string) {
           ).catch(() => undefined)
         )
       ),
-    { refreshInterval: 60_000, keepPreviousData: true, revalidateOnFocus: false }
+    { refreshInterval: VISIBLE_REFRESH_MS, keepPreviousData: true, revalidateOnFocus: false }
   );
 
   const { data: upcomingOdds } = useSWR<(MarketOdds | undefined)[]>(
@@ -97,7 +98,7 @@ function useLiveIntel(date: string) {
           ).catch(() => undefined)
         )
       ),
-    { refreshInterval: 60_000, keepPreviousData: true, revalidateOnFocus: false }
+    { refreshInterval: VISIBLE_REFRESH_MS, keepPreviousData: true, revalidateOnFocus: false }
   );
 
   return {

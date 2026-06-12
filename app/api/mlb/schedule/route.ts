@@ -28,8 +28,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "date=YYYY-MM-DD required" }, { status: 400 });
   }
   const today = new Date().toISOString().slice(0, 10);
-  const isToday = date === today;
-  const revalidate = date < today ? 3600 : isToday ? false : 60;
+  const isLiveSchedule = date >= today;
+  const revalidate = date < today ? 3600 : false;
   try {
     const raw = await fetchSchedule(date, revalidate);
     const season = Number(date.slice(0, 4)) || currentSeason();
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
     );
     return NextResponse.json(transformSchedule(raw, eraById), {
       headers: {
-        "cache-control": isToday ? "no-store" : "public, max-age=60",
+        "cache-control": isLiveSchedule ? "no-store" : "public, max-age=3600",
       },
     });
   } catch (e) {

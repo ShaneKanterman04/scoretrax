@@ -2,6 +2,7 @@
 
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
+import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
 import type { LiveGame, MarketOdds, WinProbSeries } from "@/lib/types";
 
 function pct(value: number): string {
@@ -71,7 +72,7 @@ export default function MarketRealityPanel({
       game.gameNumber
     }`,
     fetcher,
-    { refreshInterval: isLive ? 60_000 : 0, revalidateOnFocus: false }
+    { refreshInterval: isLive ? VISIBLE_REFRESH_MS : 0, revalidateOnFocus: false }
   );
 
   if (

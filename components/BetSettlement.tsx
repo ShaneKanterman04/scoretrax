@@ -9,12 +9,12 @@ import { useEffect } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { settleFromSchedule, useBets } from "@/lib/bets";
+import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
 import type { ScheduleDay } from "@/lib/types";
 
 function DateSettler({ date }: { date: string }) {
   const { data } = useSWR<ScheduleDay>(`/api/mlb/schedule?date=${date}`, fetcher, {
-    refreshInterval: (latest) =>
-      latest?.games?.some((g) => g.state === "Live") ? 30_000 : 60_000,
+    refreshInterval: VISIBLE_REFRESH_MS,
   });
   useEffect(() => {
     if (data?.games) settleFromSchedule(date, data.games);

@@ -10,6 +10,7 @@ import Tabs from "@/components/Tabs";
 import { useBets } from "@/lib/bets";
 import { fetcher, todayLocal } from "@/lib/fetcher";
 import { useFavorites, usePinnedGames } from "@/lib/favorites";
+import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
 import { getRedZoneSignal } from "@/lib/redzone";
 import type { ScheduleDay } from "@/lib/types";
 
@@ -24,12 +25,12 @@ export default function ScoresPage() {
     fetcher,
     {
       refreshInterval: (latest) => {
-        if (latest?.games?.some((g) => g.state === "Live")) return 10_000;
-        return date === todayLocal() ? 30_000 : 0;
+        if (latest?.games?.some((g) => g.state === "Live")) return VISIBLE_REFRESH_MS;
+        return date === todayLocal() ? VISIBLE_REFRESH_MS : 0;
       },
       keepPreviousData: true,
-      dedupingInterval: 2_000,
-      focusThrottleInterval: 5_000,
+      dedupingInterval: VISIBLE_REFRESH_MS,
+      focusThrottleInterval: VISIBLE_REFRESH_MS,
     }
   );
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { combinedProb, deleteBet } from "@/lib/bets";
+import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
 import type { Bet, BetLeg, MarketOdds, ScheduleGame } from "@/lib/types";
 
 const STATUS_STYLE: Record<Bet["status"], string> = {
@@ -114,10 +115,6 @@ export default function BetCard({
   gamesByPk: Map<number, ScheduleGame>;
 }) {
   const pendingLegs = bet.legs.filter((l) => l.result === "pending");
-  const anyLive = pendingLegs.some(
-    (l) => gamesByPk.get(l.gamePk)?.state === "Live"
-  );
-
   const { data: oddsList } = useSWR<(MarketOdds | null)[]>(
     bet.status === "open" && pendingLegs.length > 0
       ? ["bet-odds", bet.id, pendingLegs.map((l) => l.gamePk).join(",")]
@@ -126,7 +123,7 @@ export default function BetCard({
       Promise.all(
         pendingLegs.map((leg) => fetcher(oddsUrl(leg)).catch(() => null))
       ),
-    { refreshInterval: anyLive ? 60_000 : 0, revalidateOnFocus: false }
+    { refreshInterval: VISIBLE_REFRESH_MS, revalidateOnFocus: false }
   );
   const oddsByPk = new Map(
     pendingLegs.map((leg, i) => [leg.gamePk, oddsList?.[i]])

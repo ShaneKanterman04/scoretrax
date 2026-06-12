@@ -2,6 +2,7 @@
 
 import useSWR from "swr";
 import { fetcher, shiftDate, todayLocal } from "@/lib/fetcher";
+import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
 import type { BestBetBacktestResponse } from "@/lib/types";
 
 function pct(value: number): string {
@@ -14,7 +15,7 @@ export default function BestBetBacktestCard() {
   const { data } = useSWR<BestBetBacktestResponse>(
     `/api/bets/backtest?startDate=${startDate}&endDate=${endDate}`,
     fetcher,
-    { refreshInterval: 3_600_000, revalidateOnFocus: false }
+    { refreshInterval: VISIBLE_REFRESH_MS, revalidateOnFocus: false }
   );
 
   if (!data) return null;

@@ -17,12 +17,13 @@ import Tabs from "@/components/Tabs";
 import WhatChangedPanel from "@/components/WhatChangedPanel";
 import WinProbChart from "@/components/WinProbChart";
 import { fetcher } from "@/lib/fetcher";
+import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
 import type { BoxScore, LiveGame, WinProbSeries } from "@/lib/types";
 
 function liveRefresh(data?: LiveGame): number {
-  if (!data) return 15_000;
-  if (data.status.abstract === "Live") return 8_000;
-  if (data.status.abstract === "Preview") return 60_000;
+  if (!data) return VISIBLE_REFRESH_MS;
+  if (data.status.abstract === "Live") return VISIBLE_REFRESH_MS;
+  if (data.status.abstract === "Preview") return VISIBLE_REFRESH_MS;
   return 0;
 }
 
@@ -39,7 +40,7 @@ function WinProbSection({ game }: { game: LiveGame }) {
   const { data } = useSWR<WinProbSeries>(
     `/api/mlb/game/${game.gamePk}/winprob`,
     fetcher,
-    { refreshInterval: isLive ? 30_000 : 0, keepPreviousData: true }
+    { refreshInterval: isLive ? VISIBLE_REFRESH_MS : 0, keepPreviousData: true }
   );
   if (!data || data.points.length < 2) return null;
   return (
@@ -136,7 +137,7 @@ function LiveTab({ game }: { game: LiveGame }) {
 
 function BoxTab({ gamePk, live }: { gamePk: string; live: boolean }) {
   const { data } = useSWR<BoxScore>(`/api/mlb/game/${gamePk}/box`, fetcher, {
-    refreshInterval: live ? 30_000 : 0,
+    refreshInterval: live ? VISIBLE_REFRESH_MS : 0,
     keepPreviousData: true,
   });
   if (!data) return <div className="py-12 text-center text-sm text-muted">Loading…</div>;
@@ -155,7 +156,7 @@ function BoxTab({ gamePk, live }: { gamePk: string; live: boolean }) {
 
 function PlaysTab({ gamePk, live }: { gamePk: string; live: boolean }) {
   const { data } = useSWR<BoxScore>(`/api/mlb/game/${gamePk}/box`, fetcher, {
-    refreshInterval: live ? 30_000 : 0,
+    refreshInterval: live ? VISIBLE_REFRESH_MS : 0,
     keepPreviousData: true,
   });
   if (!data) return <div className="py-12 text-center text-sm text-muted">Loading…</div>;

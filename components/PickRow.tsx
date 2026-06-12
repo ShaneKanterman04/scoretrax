@@ -2,6 +2,7 @@
 
 import useSWR from "swr";
 import { fetcher, formatGameTime } from "@/lib/fetcher";
+import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
 import type { MarketOdds, ScheduleGame, ScheduleTeam } from "@/lib/types";
 
 function SideButton({
@@ -52,7 +53,7 @@ export default function PickRow({
       ? null
       : `/api/polymarket/game?away=${game.away.abbr}&home=${game.home.abbr}&date=${game.officialDate}&gameNumber=${game.gameNumber}`,
     fetcher,
-    { refreshInterval: 0, revalidateOnFocus: false }
+    { refreshInterval: VISIBLE_REFRESH_MS, revalidateOnFocus: false }
   );
   const awayProb = data?.matched ? data.awayProb : undefined;
   const homeProb = data?.matched ? data.homeProb : undefined;

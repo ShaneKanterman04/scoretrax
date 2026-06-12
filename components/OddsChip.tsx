@@ -2,6 +2,7 @@
 
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
+import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
 import type { MarketOdds } from "@/lib/types";
 
 export default function OddsChip({
@@ -20,7 +21,7 @@ export default function OddsChip({
   const { data } = useSWR<MarketOdds>(
     `/api/polymarket/game?away=${away}&home=${home}&date=${date}&gameNumber=${gameNumber}`,
     fetcher,
-    { refreshInterval: live ? 60_000 : 0, revalidateOnFocus: false }
+    { refreshInterval: VISIBLE_REFRESH_MS, revalidateOnFocus: false }
   );
   if (!data?.matched || data.awayProb === undefined || data.homeProb === undefined) {
     return null;

@@ -10,6 +10,7 @@ import BetStats from "@/components/BetStats";
 import Tabs from "@/components/Tabs";
 import { fetcher } from "@/lib/fetcher";
 import { useBets } from "@/lib/bets";
+import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
 import type { ScheduleDay, ScheduleGame } from "@/lib/types";
 
 // Watches one date's schedule and reports its games up for live-state
@@ -23,8 +24,7 @@ function ScheduleWatcher({
   onGames: (date: string, games: ScheduleGame[]) => void;
 }) {
   const { data } = useSWR<ScheduleDay>(`/api/mlb/schedule?date=${date}`, fetcher, {
-    refreshInterval: (latest) =>
-      latest?.games?.some((g) => g.state === "Live") ? 30_000 : 60_000,
+    refreshInterval: VISIBLE_REFRESH_MS,
     keepPreviousData: true,
   });
   useEffect(() => {
