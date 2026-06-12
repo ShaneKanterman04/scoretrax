@@ -30,12 +30,19 @@ function TeamRow({ team, winner, live }: { team: ScheduleTeam; winner?: boolean;
   );
 }
 
+function pitcherLabel(team: ScheduleTeam): string {
+  const name = team.probablePitcher?.split(" ").at(-1) ?? "TBD";
+  return team.probablePitcherEra ? `${name} ${team.probablePitcherEra} ERA` : name;
+}
+
 export default function GameCard({
   game,
   redZone,
+  betCount = 0,
 }: {
   game: ScheduleGame;
   redZone?: RedZoneSignal;
+  betCount?: number;
 }) {
   const { state } = game;
   const awayWon =
@@ -53,15 +60,24 @@ export default function GameCard({
           winner={awayWon === undefined ? undefined : !awayWon}
           live={state === "Live"}
         />
-        {redZone && (
+        {(betCount > 0 || redZone) && (
           <div className="mt-1 flex min-w-0 items-center gap-1.5">
-            <span className="rounded bg-live/15 px-1.5 py-0.5 text-[10px] font-bold text-live">
-              RZ {redZone.score}
-            </span>
-            <span className="truncate text-[10px] font-medium text-muted">
-              {redZone.label}
-              {redZone.reasons.length > 0 ? ` · ${redZone.reasons.join(" · ")}` : ""}
-            </span>
+            {betCount > 0 && (
+              <span className="rounded bg-good/15 px-1.5 py-0.5 text-[10px] font-bold text-good">
+                {betCount > 1 ? `${betCount} BETS` : "BET"}
+              </span>
+            )}
+            {redZone && (
+              <>
+                <span className="rounded bg-live/15 px-1.5 py-0.5 text-[10px] font-bold text-live">
+                  RZ {redZone.score}
+                </span>
+                <span className="truncate text-[10px] font-medium text-muted">
+                  {redZone.label}
+                  {redZone.reasons.length > 0 ? ` · ${redZone.reasons.join(" · ")}` : ""}
+                </span>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -72,8 +88,7 @@ export default function GameCard({
             <span className="text-sm font-semibold">{formatGameTime(game.gameDate)}</span>
             {(game.away.probablePitcher || game.home.probablePitcher) && (
               <span className="text-[10px] leading-tight text-muted">
-                {game.away.probablePitcher?.split(" ").at(-1) ?? "TBD"} vs{" "}
-                {game.home.probablePitcher?.split(" ").at(-1) ?? "TBD"}
+                {pitcherLabel(game.away)} vs {pitcherLabel(game.home)}
               </span>
             )}
             <OddsChip

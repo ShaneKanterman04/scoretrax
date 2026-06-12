@@ -28,6 +28,7 @@ export interface ScheduleTeam {
   score?: number;
   record?: string; // "40-25"
   probablePitcher?: string;
+  probablePitcherEra?: string;
 }
 
 export interface ScheduleDay {

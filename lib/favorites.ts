@@ -166,6 +166,19 @@ export function togglePinnedGame(gamePk: number, officialDate: string) {
   emitGames();
 }
 
+export function pinGame(gamePk: number, officialDate: string) {
+  ensureGamesLoaded();
+  const key = String(gamePk);
+  if (gamesSnapshot[key] === officialDate) return;
+  gamesSnapshot = { ...gamesSnapshot, [key]: officialDate };
+  try {
+    localStorage.setItem(GAMES_KEY, JSON.stringify(gamesSnapshot));
+  } catch {
+    // storage full/blocked: keep the in-memory state for this tab
+  }
+  emitGames();
+}
+
 export function usePinnedGames() {
   const games = useSyncExternalStore(
     subscribeGames,

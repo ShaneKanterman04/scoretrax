@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
 import DateNav from "@/components/DateNav";
 import GameCard from "@/components/GameCard";
 import HelpModal from "@/components/HelpModal";
 import MyTeamsStrip from "@/components/MyTeamsStrip";
 import Tabs from "@/components/Tabs";
+import { useBets } from "@/lib/bets";
 import { fetcher, todayLocal } from "@/lib/fetcher";
 import { useFavorites, usePinnedGames } from "@/lib/favorites";
 import { getRedZoneSignal } from "@/lib/redzone";
@@ -17,6 +18,7 @@ export default function ScoresPage() {
   const [mode, setMode] = useState("Scores");
   const { isFavorite } = useFavorites();
   const { isPinned } = usePinnedGames();
+  const { bets } = useBets();
   const { data, isLoading } = useSWR<ScheduleDay>(
     `/api/mlb/schedule?date=${date}`,
     fetcher,
@@ -32,6 +34,17 @@ export default function ScoresPage() {
   );
 
   const games = data?.games ?? [];
+  const openBetCounts = useMemo(() => {
+    const counts = new Map<number, number>();
+    for (const bet of bets) {
+      if (bet.status !== "open") continue;
+      for (const leg of bet.legs) {
+        if (leg.result !== "pending") continue;
+        counts.set(leg.gamePk, (counts.get(leg.gamePk) ?? 0) + 1);
+      }
+    }
+    return counts;
+  }, [bets]);
   const pinnedGames = games.filter((g) => isPinned(g.gamePk));
   const unpinned = games.filter((g) => !isPinned(g.gamePk));
   const favGames = unpinned.filter(
@@ -89,7 +102,11 @@ export default function ScoresPage() {
                   RedZone
                 </h2>
               )}
-              <GameCard game={game} redZone={signal} />
+              <GameCard
+                game={game}
+                redZone={signal}
+                betCount={openBetCounts.get(game.gamePk) ?? 0}
+              />
             </div>
           ))}
         {mode === "Scores" && pinnedGames.length > 0 && (
@@ -98,7 +115,7 @@ export default function ScoresPage() {
               Pinned
             </h2>
             {pinnedGames.map((g) => (
-              <GameCard key={g.gamePk} game={g} />
+              <GameCard key={g.gamePk} game={g} betCount={openBetCounts.get(g.gamePk) ?? 0} />
             ))}
           </>
         )}
@@ -108,7 +125,7 @@ export default function ScoresPage() {
               My teams
             </h2>
             {favGames.map((g) => (
-              <GameCard key={g.gamePk} game={g} />
+              <GameCard key={g.gamePk} game={g} betCount={openBetCounts.get(g.gamePk) ?? 0} />
             ))}
           </>
         )}
@@ -120,7 +137,7 @@ export default function ScoresPage() {
             </h2>
           )}
         {mode === "Scores" && restGames.map((g) => (
-          <GameCard key={g.gamePk} game={g} />
+          <GameCard key={g.gamePk} game={g} betCount={openBetCounts.get(g.gamePk) ?? 0} />
         ))}
       </div>
     </main>

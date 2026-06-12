@@ -54,7 +54,10 @@ function basesFromLinescore(linescore: any): Bases {
   };
 }
 
-export function transformSchedule(raw: any): ScheduleDay {
+export function transformSchedule(
+  raw: any,
+  pitcherEraById: Map<number, string> = new Map()
+): ScheduleDay {
   const day = raw.dates?.[0];
   const games: ScheduleGame[] = (day?.games ?? []).map((g: any) => {
     const mk = (side: "away" | "home") => {
@@ -66,6 +69,7 @@ export function transformSchedule(raw: any): ScheduleDay {
         score: t.score,
         record: recordOf(t.leagueRecord),
         probablePitcher: t.probablePitcher?.fullName,
+        probablePitcherEra: pitcherEraById.get(t.probablePitcher?.id),
       };
     };
     const game: ScheduleGame = {
