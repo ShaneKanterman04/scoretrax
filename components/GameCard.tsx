@@ -5,6 +5,7 @@ import type { ScheduleGame, ScheduleTeam } from "@/lib/types";
 import { formatGameTime } from "@/lib/fetcher";
 import type { RedZoneSignal } from "@/lib/redzone";
 import BasesDiamond from "./BasesDiamond";
+import FirstPitchCountdown from "./FirstPitchCountdown";
 import GameStar from "./GameStar";
 import OddsChip from "./OddsChip";
 
@@ -86,6 +87,7 @@ export default function GameCard({
         {state === "Preview" && (
           <>
             <span className="text-sm font-semibold">{formatGameTime(game.gameDate)}</span>
+            <FirstPitchCountdown gameDate={game.gameDate} />
             {(game.away.probablePitcher || game.home.probablePitcher) && (
               <span className="text-[10px] leading-tight text-muted">
                 {pitcherLabel(game.away)} vs {pitcherLabel(game.home)}
