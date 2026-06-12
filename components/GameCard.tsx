@@ -92,6 +92,7 @@ export default function GameCard({
               </span>
             )}
             <OddsChip
+              gamePk={game.gamePk}
               away={game.away.abbr}
               home={game.home.abbr}
               date={game.officialDate}

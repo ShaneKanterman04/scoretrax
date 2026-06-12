@@ -7,10 +7,30 @@
 
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
+
+  const oddsRaw = process.env.ODDS_POLL_SECONDS;
+  if (oddsRaw !== "0" && (process.env.NODE_ENV === "production" || oddsRaw)) {
+    const seconds = Math.max(60, Number(oddsRaw) || 300);
+    const { runOddsHistorySweep } = await import("./lib/odds-history");
+    let running = false;
+    console.log(`[odds] history poller started (every ${seconds}s)`);
+    setInterval(async () => {
+      if (running) return;
+      running = true;
+      try {
+        const { matched, sampled } = await runOddsHistorySweep();
+        if (sampled > 0) console.log(`[odds] sampled ${matched}/${sampled} pregame markets`);
+      } catch (e) {
+        console.error("[odds] sweep failed:", e);
+      } finally {
+        running = false;
+      }
+    }, seconds * 1000);
+  }
+
   if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
     return;
   }
-
   const raw = process.env.PUSH_POLL_SECONDS;
   if (raw === "0") return;
   if (process.env.NODE_ENV !== "production" && !raw) return;

@@ -34,6 +34,7 @@ export default function ScoreboardHeader({ game, date }: { game: LiveGame; date:
               {inningLabel(game)}
             </span>
             <OddsChip
+              gamePk={game.gamePk}
               away={away.abbr}
               home={home.abbr}
               date={date}

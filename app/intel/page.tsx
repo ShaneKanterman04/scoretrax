@@ -5,11 +5,19 @@ import { useMemo, useState } from "react";
 import useSWR from "swr";
 import DateNav from "@/components/DateNav";
 import HelpModal from "@/components/HelpModal";
+import OddsTimeline, { movement } from "@/components/OddsTimeline";
 import Tabs from "@/components/Tabs";
 import { fetcher, formatGameTime, todayLocal } from "@/lib/fetcher";
 import { getMarketGap, getPressureSignal } from "@/lib/live-intel";
-import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
-import type { LiveGame, MarketOdds, ScheduleDay, ScheduleGame, WinProbSeries } from "@/lib/types";
+import { ODDS_HISTORY_REFRESH_MS, VISIBLE_REFRESH_MS } from "@/lib/refresh";
+import type {
+  GameOddsHistory,
+  LiveGame,
+  MarketOdds,
+  ScheduleDay,
+  ScheduleGame,
+  WinProbSeries,
+} from "@/lib/types";
 
 function inningLabel(game: LiveGame): string {
   const arrow = game.linescore.isTop ? "▲" : "▼";
@@ -100,6 +108,11 @@ function useLiveIntel(date: string) {
       ),
     { refreshInterval: VISIBLE_REFRESH_MS, keepPreviousData: true, revalidateOnFocus: false }
   );
+  const { data: oddsHistory } = useSWR<GameOddsHistory[]>(
+    `/api/odds/history?date=${date}`,
+    fetcher,
+    { refreshInterval: ODDS_HISTORY_REFRESH_MS, keepPreviousData: true, revalidateOnFocus: false }
+  );
 
   return {
     schedule,
@@ -109,6 +122,7 @@ function useLiveIntel(date: string) {
     odds,
     upcomingGames,
     upcomingOdds,
+    oddsHistory,
   };
 }
 
@@ -226,12 +240,14 @@ function MarketBoard({
   odds,
   upcomingGames,
   upcomingOdds,
+  oddsHistory,
 }: {
   liveGames?: LiveGame[];
   winProbs?: (WinProbSeries | undefined)[];
   odds?: (MarketOdds | undefined)[];
   upcomingGames?: ScheduleGame[];
   upcomingOdds?: (MarketOdds | undefined)[];
+  oddsHistory?: GameOddsHistory[];
 }) {
   if (!liveGames) return <LoadingState label="Loading market gaps…" />;
 
@@ -242,10 +258,19 @@ function MarketBoard({
     }))
     .filter((row): row is { game: LiveGame; gap: NonNullable<typeof row.gap> } => !!row.gap)
     .sort((a, b) => b.gap.delta - a.gap.delta);
+  const historyByPk = new Map((oddsHistory ?? []).map((history) => [history.gamePk, history]));
   const pregameRows = (upcomingGames ?? [])
-    .map((game, index) => ({ game, odds: upcomingOdds?.[index] }))
+    .map((game, index) => ({
+      game,
+      odds: upcomingOdds?.[index],
+      history: historyByPk.get(game.gamePk),
+    }))
     .filter(
-      (row): row is { game: ScheduleGame; odds: MarketOdds } =>
+      (row): row is {
+        game: ScheduleGame;
+        odds: MarketOdds;
+        history: GameOddsHistory | undefined;
+      } =>
         !!row.odds?.matched &&
         row.odds.awayProb !== undefined &&
         row.odds.homeProb !== undefined
@@ -299,13 +324,14 @@ function MarketBoard({
           <h2 className="mt-2 text-[11px] font-bold uppercase tracking-wider text-muted">
             Pregame markets
           </h2>
-          {pregameRows.slice(0, 8).map(({ game, odds }) => {
+          {pregameRows.slice(0, 8).map(({ game, odds, history }) => {
             const awayProb = odds.awayProb! * 100;
             const homeProb = odds.homeProb! * 100;
             const favorite =
               homeProb >= awayProb
-                ? { abbr: game.home.abbr, prob: homeProb }
-                : { abbr: game.away.abbr, prob: awayProb };
+                ? { abbr: game.home.abbr, prob: homeProb, side: "home" as const }
+                : { abbr: game.away.abbr, prob: awayProb, side: "away" as const };
+            const move = movement(history, favorite.side);
             return (
               <Link
                 key={game.gamePk}
@@ -326,6 +352,13 @@ function MarketBoard({
                     Pregame
                   </span>
                 </div>
+                {move && (
+                  <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold">
+                    <OddsTimeline history={history} side={favorite.side} className={move.className} />
+                    <span className={move.className}>{move.label}</span>
+                    <span className="text-muted">since first sample</span>
+                  </div>
+                )}
                 <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
                   <div className="rounded-lg bg-surface-2 p-2">
                     <div className="font-bold">{game.away.abbr}</div>
@@ -348,7 +381,7 @@ function MarketBoard({
 export default function IntelPage() {
   const [date, setDate] = useState(todayLocal);
   const [tab, setTab] = useState("Pressure");
-  const { isLoading, liveGames, winProbs, odds, upcomingGames, upcomingOdds } =
+  const { isLoading, liveGames, winProbs, odds, upcomingGames, upcomingOdds, oddsHistory } =
     useLiveIntel(date);
 
   return (
@@ -385,6 +418,7 @@ export default function IntelPage() {
           odds={odds}
           upcomingGames={upcomingGames}
           upcomingOdds={upcomingOdds}
+          oddsHistory={oddsHistory}
         />
       )}
     </main>

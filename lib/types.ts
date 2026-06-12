@@ -255,6 +255,24 @@ export interface MarketOdds {
   title?: string;
 }
 
+export interface OddsSample {
+  ts: string; // ISO timestamp for the 5-minute sample bucket
+  awayProb: number; // 0..1
+  homeProb: number; // 0..1
+}
+
+export interface GameOddsHistory {
+  gamePk: number;
+  officialDate: string;
+  gameDate: string;
+  gameNumber: number;
+  awayAbbr: string;
+  homeAbbr: string;
+  samples: OddsSample[];
+  first?: OddsSample;
+  latest?: OddsSample;
+}
+
 export type BestBetSide = "away" | "home";
 export type BestBetConfidence = "Strong" | "Standard" | "Lean";
 

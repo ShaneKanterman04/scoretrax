@@ -1,1 +1,2 @@
 export const VISIBLE_REFRESH_MS = 2_000;
+export const ODDS_HISTORY_REFRESH_MS = 60_000;

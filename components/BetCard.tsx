@@ -4,8 +4,9 @@ import Link from "next/link";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { combinedProb, deleteBet } from "@/lib/bets";
-import { VISIBLE_REFRESH_MS } from "@/lib/refresh";
-import type { Bet, BetLeg, MarketOdds, ScheduleGame } from "@/lib/types";
+import { ODDS_HISTORY_REFRESH_MS, VISIBLE_REFRESH_MS } from "@/lib/refresh";
+import type { Bet, BetLeg, GameOddsHistory, MarketOdds, ScheduleGame } from "@/lib/types";
+import OddsTimeline, { movement } from "./OddsTimeline";
 
 const STATUS_STYLE: Record<Bet["status"], string> = {
   open: "bg-accent/15 text-accent",
@@ -41,15 +42,18 @@ function LegRow({
   leg,
   game,
   odds,
+  history,
 }: {
   leg: BetLeg;
   game?: ScheduleGame;
   odds?: MarketOdds | null;
+  history?: GameOddsHistory | null;
 }) {
   const pickAbbr = leg.pick === "away" ? leg.awayAbbr : leg.homeAbbr;
   const context =
     leg.pick === "away" ? `@ ${leg.homeAbbr}` : `vs ${leg.awayAbbr}`;
   const liveProb = legLiveProb(leg, odds);
+  const move = movement(history, leg.pick);
 
   return (
     <Link
@@ -68,28 +72,32 @@ function LegRow({
         )}
       </div>
       {leg.result === "pending" ? (
-        <span className="text-sm tabular-nums">
-          {leg.entryProb !== undefined && (
-            <span className="text-muted">{pct(leg.entryProb)} → </span>
-          )}
-          {liveProb !== undefined ? (
-            <span
-              className={`font-semibold ${
-                leg.entryProb === undefined || liveProb === leg.entryProb
-                  ? ""
-                  : liveProb > leg.entryProb
-                    ? "text-good"
-                    : "text-live"
-              }`}
-            >
-              {pct(liveProb)}
-              {leg.entryProb !== undefined &&
-                liveProb !== leg.entryProb &&
-                (liveProb > leg.entryProb ? " ▲" : " ▼")}
-            </span>
-          ) : (
-            <span className="text-muted">—</span>
-          )}
+        <span className="flex shrink-0 items-center gap-1 text-sm tabular-nums">
+          <span>
+            {leg.entryProb !== undefined && (
+              <span className="text-muted">{pct(leg.entryProb)} → </span>
+            )}
+            {liveProb !== undefined ? (
+              <span
+                className={`font-semibold ${
+                  leg.entryProb === undefined || liveProb === leg.entryProb
+                    ? ""
+                    : liveProb > leg.entryProb
+                      ? "text-good"
+                      : "text-live"
+                }`}
+              >
+                {pct(liveProb)}
+                {leg.entryProb !== undefined &&
+                  liveProb !== leg.entryProb &&
+                  (liveProb > leg.entryProb ? " ▲" : " ▼")}
+              </span>
+            ) : (
+              <span className="text-muted">—</span>
+            )}
+          </span>
+          <OddsTimeline history={history} side={leg.pick} className={move?.className} />
+          {move && <span className={`text-[11px] font-semibold ${move.className}`}>{move.label}</span>}
         </span>
       ) : (
         <span className="text-sm font-semibold tabular-nums">
@@ -123,10 +131,27 @@ export default function BetCard({
       Promise.all(
         pendingLegs.map((leg) => fetcher(oddsUrl(leg)).catch(() => null))
       ),
-    { refreshInterval: VISIBLE_REFRESH_MS, revalidateOnFocus: false }
+    { refreshInterval: ODDS_HISTORY_REFRESH_MS, revalidateOnFocus: false }
   );
   const oddsByPk = new Map(
     pendingLegs.map((leg, i) => [leg.gamePk, oddsList?.[i]])
+  );
+  const { data: histories } = useSWR<(GameOddsHistory | null)[]>(
+    bet.status === "open" && pendingLegs.length > 0
+      ? ["bet-odds-history", bet.id, pendingLegs.map((l) => l.gamePk).join(",")]
+      : null,
+    () =>
+      Promise.all(
+        pendingLegs.map((leg) =>
+          fetcher(
+            `/api/odds/history?date=${leg.officialDate}&gamePk=${leg.gamePk}`
+          ).catch(() => null)
+        )
+      ),
+    { refreshInterval: VISIBLE_REFRESH_MS, revalidateOnFocus: false }
+  );
+  const historyByPk = new Map(
+    pendingLegs.map((leg, i) => [leg.gamePk, histories?.[i]])
   );
 
   const entryCombined = combinedProb(bet.legs.map((l) => l.entryProb));
@@ -165,6 +190,7 @@ export default function BetCard({
             leg={leg}
             game={gamesByPk.get(leg.gamePk)}
             odds={oddsByPk.get(leg.gamePk)}
+            history={historyByPk.get(leg.gamePk)}
           />
         ))}
       </div>
