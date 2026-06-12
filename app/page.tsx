@@ -45,8 +45,10 @@ export default function ScoresPage() {
     }
     return counts;
   }, [bets]);
-  const pinnedGames = games.filter((g) => isPinned(g.gamePk));
-  const unpinned = games.filter((g) => !isPinned(g.gamePk));
+  const isEffectivelyPinned = (gamePk: number) =>
+    isPinned(gamePk) || openBetCounts.has(gamePk);
+  const pinnedGames = games.filter((g) => isEffectivelyPinned(g.gamePk));
+  const unpinned = games.filter((g) => !isEffectivelyPinned(g.gamePk));
   const favGames = unpinned.filter(
     (g) => isFavorite(g.away.id) || isFavorite(g.home.id)
   );
@@ -68,8 +70,8 @@ export default function ScoresPage() {
         <h1 className="text-2xl font-bold">Scores</h1>
         <HelpModal title="Scores help" triggerLabel="Scores help">
           <p>
-            Scores keeps pinned games first, then favorite teams, then the rest of the
-            league.
+            Scores keeps pinned games and games with open bets first, then favorite
+            teams, then the rest of the league.
           </p>
           <p>
             RedZone ranks unfinished games by live pressure: inning, score margin,

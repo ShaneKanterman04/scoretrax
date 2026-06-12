@@ -5,7 +5,6 @@
 // components in sync within the tab; the `storage` event syncs across tabs.
 
 import { useSyncExternalStore } from "react";
-import { pinGame } from "@/lib/favorites";
 import type { Bet, BetLeg, BetStatus, LegResult, ScheduleGame } from "@/lib/types";
 
 const KEY = "scoretrax:bets";
@@ -76,9 +75,6 @@ function getServerSnapshot(): Bet[] {
 
 export function addBet(legs: Omit<BetLeg, "result">[]): Bet {
   ensureLoaded();
-  for (const leg of legs) {
-    pinGame(leg.gamePk, leg.officialDate);
-  }
   const bet: Bet = {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
