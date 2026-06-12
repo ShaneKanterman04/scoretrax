@@ -66,7 +66,7 @@ export default function ScoresPage() {
     });
 
   return (
-    <main className="px-4 pt-safe">
+    <main className="px-4 pb-24 pt-safe">
       <div className="flex items-center justify-between gap-3 pb-1">
         <h1 className="text-2xl font-bold">Scores</h1>
         <HelpModal title="Scores help" triggerLabel="Scores help">

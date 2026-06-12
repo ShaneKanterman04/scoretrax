@@ -9,16 +9,26 @@ import FirstPitchCountdown from "./FirstPitchCountdown";
 import GameStar from "./GameStar";
 import OddsChip from "./OddsChip";
 
-function TeamRow({ team, winner, live }: { team: ScheduleTeam; winner?: boolean; live?: boolean }) {
+function TeamRow({
+  team,
+  winner,
+  live,
+  showScore,
+}: {
+  team: ScheduleTeam;
+  winner?: boolean;
+  live?: boolean;
+  showScore: boolean;
+}) {
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-baseline gap-2">
+      <div className="flex min-w-0 items-baseline gap-2">
         <span className={`text-sm font-bold ${winner === false ? "text-muted" : ""}`}>
           {team.abbr}
         </span>
-        <span className="text-[11px] text-muted">{team.record}</span>
+        <span className="truncate text-[11px] text-muted">{team.record}</span>
       </div>
-      {team.score !== undefined && (
+      {showScore && team.score !== undefined && (
         <span
           className={`text-lg font-bold tabular-nums ${
             winner === false ? "text-muted" : live ? "text-foreground" : ""
@@ -46,20 +56,22 @@ export default function GameCard({
   betCount?: number;
 }) {
   const { state } = game;
+  const showScore = state !== "Preview";
   const awayWon =
     state === "Final" ? (game.away.score ?? 0) > (game.home.score ?? 0) : undefined;
 
   return (
     <Link
       href={`/game/${game.gamePk}`}
-      className="flex items-stretch gap-3 rounded-xl bg-surface p-3 active:bg-surface-2"
+      className="flex items-stretch gap-3 rounded-xl bg-surface p-3 ring-1 ring-white/[0.03] active:bg-surface-2"
     >
-      <div className="min-w-0 flex-1 flex flex-col justify-center gap-1">
-        <TeamRow team={game.away} winner={awayWon} live={state === "Live"} />
+      <div className="min-w-0 flex flex-1 flex-col justify-center gap-1">
+        <TeamRow team={game.away} winner={awayWon} live={state === "Live"} showScore={showScore} />
         <TeamRow
           team={game.home}
           winner={awayWon === undefined ? undefined : !awayWon}
           live={state === "Live"}
+          showScore={showScore}
         />
         {(betCount > 0 || redZone) && (
           <div className="mt-1 flex min-w-0 items-center gap-1.5">
@@ -83,13 +95,14 @@ export default function GameCard({
         )}
       </div>
       <GameStar gamePk={game.gamePk} officialDate={game.officialDate} />
-      <div className="flex w-28 shrink-0 flex-col items-end justify-center gap-1 border-l border-edge pl-3 text-right">
+      <div className="flex w-32 shrink-0 flex-col items-end justify-center gap-1 border-l border-edge pl-3 text-right">
         {state === "Preview" && (
           <>
             <span className="text-sm font-semibold">{formatGameTime(game.gameDate)}</span>
+            <span className="text-[10px] font-semibold uppercase text-muted">First pitch</span>
             <FirstPitchCountdown gameDate={game.gameDate} />
             {(game.away.probablePitcher || game.home.probablePitcher) && (
-              <span className="text-[10px] leading-tight text-muted">
+              <span className="max-w-full text-[10px] leading-tight text-muted">
                 {pitcherLabel(game.away)} vs {pitcherLabel(game.home)}
               </span>
             )}

@@ -35,8 +35,8 @@ export default function FirstPitchCountdown({ gameDate }: { gameDate: string }) 
   if (now === null || !Number.isFinite(firstPitch)) return null;
 
   return (
-    <span className="whitespace-nowrap rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold text-accent tabular-nums">
-      First pitch {formatCountdown(firstPitch - now)}
+    <span className="rounded-full bg-accent/15 px-2.5 py-0.5 text-[11px] font-bold text-accent tabular-nums">
+      {formatCountdown(firstPitch - now)}
     </span>
   );
 }
