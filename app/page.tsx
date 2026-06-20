@@ -65,8 +65,11 @@ export default function ScoresPage() {
       return new Date(a.game.gameDate).getTime() - new Date(b.game.gameDate).getTime();
     });
 
+  const labeledRest =
+    pinnedGames.length > 0 || favGames.length > 0 ? "Around the league" : undefined;
+
   return (
-    <main className="px-4 pb-24 pt-safe">
+    <main className="mx-auto max-w-6xl px-4 pb-24 pt-safe">
       <div className="flex items-center justify-between gap-3 pb-1">
         <h1 className="text-2xl font-bold">Scores</h1>
         <HelpModal title="Scores help" triggerLabel="Scores help">
@@ -85,7 +88,7 @@ export default function ScoresPage() {
       <div className="mt-3">
         <Tabs tabs={["Scores", "RedZone"]} active={mode} onChange={setMode} />
       </div>
-      <div className="mt-2 flex flex-col gap-2">
+      <div className="mt-3 flex flex-col gap-4">
         {isLoading && !data && (
           <div className="py-16 text-center text-sm text-muted">Loading games…</div>
         )}
@@ -97,52 +100,63 @@ export default function ScoresPage() {
             No live pressure spots right now.
           </div>
         )}
-        {mode === "RedZone" &&
-          redZoneGames.map(({ game, signal }, index) => (
-            <div key={game.gamePk} className="flex flex-col gap-1">
-              {index === 0 && (
-                <h2 className="mt-1 text-[11px] font-bold uppercase tracking-wider text-muted">
-                  RedZone
-                </h2>
-              )}
+        {mode === "RedZone" && redZoneGames.length > 0 && (
+          <GameSection label="RedZone">
+            {redZoneGames.map(({ game, signal }) => (
               <GameCard
+                key={game.gamePk}
                 game={game}
                 redZone={signal}
                 betCount={openBetCounts.get(game.gamePk) ?? 0}
               />
-            </div>
-          ))}
+            ))}
+          </GameSection>
+        )}
         {mode === "Scores" && pinnedGames.length > 0 && (
-          <>
-            <h2 className="mt-1 text-[11px] font-bold uppercase tracking-wider text-muted">
-              Pinned
-            </h2>
+          <GameSection label="Pinned">
             {pinnedGames.map((g) => (
               <GameCard key={g.gamePk} game={g} betCount={openBetCounts.get(g.gamePk) ?? 0} />
             ))}
-          </>
+          </GameSection>
         )}
         {mode === "Scores" && favGames.length > 0 && (
-          <>
-            <h2 className="mt-1 text-[11px] font-bold uppercase tracking-wider text-muted">
-              My teams
-            </h2>
+          <GameSection label="My teams">
             {favGames.map((g) => (
               <GameCard key={g.gamePk} game={g} betCount={openBetCounts.get(g.gamePk) ?? 0} />
             ))}
-          </>
+          </GameSection>
         )}
-        {mode === "Scores" &&
-          (pinnedGames.length > 0 || favGames.length > 0) &&
-          restGames.length > 0 && (
-            <h2 className="mt-1 text-[11px] font-bold uppercase tracking-wider text-muted">
-              Around the league
-            </h2>
-          )}
-        {mode === "Scores" && restGames.map((g) => (
-          <GameCard key={g.gamePk} game={g} betCount={openBetCounts.get(g.gamePk) ?? 0} />
-        ))}
+        {mode === "Scores" && restGames.length > 0 && (
+          <GameSection label={labeledRest}>
+            {restGames.map((g) => (
+              <GameCard key={g.gamePk} game={g} betCount={openBetCounts.get(g.gamePk) ?? 0} />
+            ))}
+          </GameSection>
+        )}
       </div>
     </main>
+  );
+}
+
+// A titled group of game cards: single column on mobile, multi-column on
+// wider screens. Header is omitted when `label` is undefined.
+function GameSection({
+  label,
+  children,
+}: {
+  label?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-2">
+      {label && (
+        <h2 className="text-[11px] font-bold uppercase tracking-wider text-muted">
+          {label}
+        </h2>
+      )}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+        {children}
+      </div>
+    </section>
   );
 }

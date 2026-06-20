@@ -21,7 +21,7 @@ export default function ScoreboardHeader({ game, date }: { game: LiveGame; date:
   const rhe = game.linescore.rhe;
   return (
     <div className="sticky top-0 z-40 border-b border-edge bg-background/95 px-4 pb-2 pt-safe backdrop-blur">
-      <div className="mx-auto max-w-lg">
+      <div className="mx-auto max-w-2xl">
         <div className="flex items-center justify-between">
           <div className="flex-1 text-center">
             <div className="text-sm font-semibold text-muted">{away.abbr}</div>

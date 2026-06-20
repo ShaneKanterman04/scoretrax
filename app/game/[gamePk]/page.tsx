@@ -199,13 +199,15 @@ export default function GamePage({
     <main className="relative">
       <EventFlash game={game} />
       <ScoreboardHeader game={game} date={date} />
-      <WhatChangedPanel game={game} />
-      <div className="px-4 pt-3">
-        <Tabs tabs={["Live", "Box", "Plays"]} active={tab} onChange={setTab} />
+      <div className="mx-auto max-w-2xl">
+        <WhatChangedPanel game={game} />
+        <div className="px-4 pt-3">
+          <Tabs tabs={["Live", "Box", "Plays"]} active={tab} onChange={setTab} />
+        </div>
+        {tab === "Live" && <LiveTab game={game} />}
+        {tab === "Box" && <BoxTab gamePk={gamePk} live={live} />}
+        {tab === "Plays" && <PlaysTab gamePk={gamePk} live={live} />}
       </div>
-      {tab === "Live" && <LiveTab game={game} />}
-      {tab === "Box" && <BoxTab gamePk={gamePk} live={live} />}
-      {tab === "Plays" && <PlaysTab gamePk={gamePk} live={live} />}
     </main>
   );
 }

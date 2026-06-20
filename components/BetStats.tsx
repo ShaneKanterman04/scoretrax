@@ -29,7 +29,7 @@ export default function BetStats({ bets }: { bets: Bet[] }) {
   ];
 
   return (
-    <div className="mb-2">
+    <div className="mb-2 max-w-md">
       <div className="grid grid-cols-4 gap-2">
         {tiles.map((t) => (
           <div key={t.label} className="rounded-xl bg-surface p-2 text-center">

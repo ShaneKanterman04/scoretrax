@@ -36,7 +36,7 @@ export default function TeamPage({
   })).filter((g) => g.players.length > 0);
 
   return (
-    <main className="px-4 pt-safe">
+    <main className="mx-auto max-w-4xl px-4 pt-safe">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{data.name}</h1>
         <FavoriteStar teamId={data.id} className="h-6 w-6" />
@@ -47,7 +47,7 @@ export default function TeamPage({
           <h2 className="mb-1.5 mt-4 text-[11px] font-bold uppercase tracking-wider text-muted">
             Upcoming
           </h2>
-          <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {data.upcomingGames.map((g) => (
               <GameCard key={g.gamePk} game={g} />
             ))}
@@ -60,7 +60,7 @@ export default function TeamPage({
           <h2 className="mb-1.5 mt-4 text-[11px] font-bold uppercase tracking-wider text-muted">
             Recent
           </h2>
-          <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {data.recentGames.map((g) => (
               <GameCard key={g.gamePk} game={g} />
             ))}
@@ -71,7 +71,7 @@ export default function TeamPage({
       <h2 className="mb-1.5 mt-4 text-[11px] font-bold uppercase tracking-wider text-muted">
         Roster
       </h2>
-      <div className="flex flex-col gap-3 pb-4">
+      <div className="grid grid-cols-1 items-start gap-3 pb-4 sm:grid-cols-2 lg:grid-cols-3">
         {grouped.map((group) => (
           <section key={group.label} className="rounded-xl bg-surface">
             <h3 className="border-b border-edge px-3 py-2 text-xs font-bold text-muted">

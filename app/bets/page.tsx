@@ -76,7 +76,7 @@ export default function BetsPage() {
           );
 
   return (
-    <main className="px-4 pt-safe">
+    <main className="mx-auto max-w-5xl px-4 pt-safe">
       {pendingDates.map((date) => (
         <ScheduleWatcher key={date} date={date} onGames={onGames} />
       ))}
@@ -89,22 +89,25 @@ export default function BetsPage() {
           New Bet
         </Link>
       </div>
-      <BestBetCard />
-      <BestBetBacktestCard />
+      <div className="grid items-start lg:grid-cols-2 lg:gap-3">
+        <BestBetCard />
+        <BestBetBacktestCard />
+      </div>
       <BetStats bets={bets} />
       <Tabs tabs={["Open", "Settled"]} active={tab} onChange={setTab} />
-      <div className="mt-2 flex flex-col gap-2">
-        {shown.length === 0 && (
-          <div className="py-16 text-center text-sm text-muted">
-            {tab === "Open"
-              ? "No open bets. Build one from a day's games."
-              : "No settled bets yet."}
-          </div>
-        )}
-        {shown.map((bet) => (
-          <BetCard key={bet.id} bet={bet} gamesByPk={gamesByPk} />
-        ))}
-      </div>
+      {shown.length === 0 ? (
+        <div className="py-16 text-center text-sm text-muted">
+          {tab === "Open"
+            ? "No open bets. Build one from a day's games."
+            : "No settled bets yet."}
+        </div>
+      ) : (
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {shown.map((bet) => (
+            <BetCard key={bet.id} bet={bet} gamesByPk={gamesByPk} />
+          ))}
+        </div>
+      )}
     </main>
   );
 }

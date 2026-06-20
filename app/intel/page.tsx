@@ -147,9 +147,11 @@ function PressureStack({
     .slice(0, 8);
 
   return (
-    <div className="mt-3 flex flex-col gap-2">
+    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
       {rows.length === 0 && (upcomingGames?.length ?? 0) === 0 && (
-        <LoadingState label="No live at-bats or upcoming games right now." />
+        <div className="col-span-full">
+          <LoadingState label="No live at-bats or upcoming games right now." />
+        </div>
       )}
       {rows.map(({ game, signal }, index) => (
         <Link
@@ -198,7 +200,7 @@ function PressureStack({
       ))}
       {(upcomingGames?.length ?? 0) > 0 && (
         <>
-          <h2 className="mt-2 text-[11px] font-bold uppercase tracking-wider text-muted">
+          <h2 className="col-span-full mt-2 text-[11px] font-bold uppercase tracking-wider text-muted">
             On deck
           </h2>
           {upcomingGames!.slice(0, 6).map((game) => (
@@ -278,9 +280,11 @@ function MarketBoard({
     .sort((a, b) => new Date(a.game.gameDate).getTime() - new Date(b.game.gameDate).getTime());
 
   return (
-    <div className="mt-3 flex flex-col gap-2">
+    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
       {rows.length === 0 && pregameRows.length === 0 && (
-        <LoadingState label="No matched Polymarket games yet." />
+        <div className="col-span-full">
+          <LoadingState label="No matched Polymarket games yet." />
+        </div>
       )}
       {rows.map(({ game, gap }) => (
         <Link
@@ -321,7 +325,7 @@ function MarketBoard({
       ))}
       {pregameRows.length > 0 && (
         <>
-          <h2 className="mt-2 text-[11px] font-bold uppercase tracking-wider text-muted">
+          <h2 className="col-span-full mt-2 text-[11px] font-bold uppercase tracking-wider text-muted">
             Pregame markets
           </h2>
           {pregameRows.slice(0, 8).map(({ game, odds, history }) => {
@@ -385,7 +389,7 @@ export default function IntelPage() {
     useLiveIntel(date);
 
   return (
-    <main className="px-4 pt-safe">
+    <main className="mx-auto max-w-6xl px-4 pt-safe">
       <div className="flex items-center justify-between gap-3 pb-1">
         <h1 className="text-2xl font-bold">Intel</h1>
         <HelpModal title="Intel help" triggerLabel="Intel help">

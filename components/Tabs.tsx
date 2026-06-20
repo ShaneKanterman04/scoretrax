@@ -10,7 +10,7 @@ export default function Tabs({
   onChange: (tab: string) => void;
 }) {
   return (
-    <div className="flex rounded-lg bg-surface p-1">
+    <div className="flex max-w-md rounded-lg bg-surface p-1">
       {tabs.map((tab) => (
         <button
           key={tab}
