@@ -37,11 +37,11 @@ export default function StandingsPage() {
   const wildCard = data?.wildCards?.find((w) => w.league === league);
 
   return (
-    <main className="px-4 pt-safe">
+    <main className="mx-auto max-w-4xl px-4 pt-safe">
       <h1 className="pb-2 text-2xl font-bold">Standings</h1>
       <Tabs tabs={["AL", "NL"]} active={league} onChange={setLeague} />
       {!data && <div className="py-16 text-center text-sm text-muted">Loading…</div>}
-      <div className="mt-3 flex flex-col gap-4 pb-4">
+      <div className="mt-3 grid gap-4 pb-4 lg:grid-cols-2">
         {divisions.map((div) => (
           <section key={div.division} className="rounded-xl bg-surface">
             <h2 className="border-b border-edge px-3 py-2 text-sm font-bold">
@@ -77,7 +77,7 @@ export default function StandingsPage() {
         ))}
 
         {wildCard && wildCard.rows.length > 0 && (
-          <section className="rounded-xl bg-surface">
+          <section className="rounded-xl bg-surface lg:col-span-2">
             <h2 className="border-b border-edge px-3 py-2 text-sm font-bold">
               {league} Wild Card
             </h2>

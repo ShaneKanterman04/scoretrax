@@ -22,7 +22,7 @@ export default function DateNav({
   onChange: (date: string) => void;
 }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex max-w-md items-center justify-between">
       <button
         aria-label="Previous day"
         onClick={() => onChange(shiftDate(date, -1))}

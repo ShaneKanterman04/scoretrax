@@ -14,12 +14,12 @@ export default function TeamsPage() {
       a.name.localeCompare(b.name)
   );
   return (
-    <main className="px-4 pt-safe">
+    <main className="mx-auto max-w-5xl px-4 pt-safe">
       <div className="flex items-center justify-between pb-2">
         <h1 className="text-2xl font-bold">Teams</h1>
         <NotificationToggle />
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {sorted.map((t) => (
           <Link
             key={t.id}

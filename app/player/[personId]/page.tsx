@@ -24,7 +24,7 @@ export default function PlayerPage({
   const logCols = data.gameLog[0] ? Object.keys(data.gameLog[0].line) : [];
 
   return (
-    <main className="px-4 pt-safe">
+    <main className="mx-auto max-w-3xl px-4 pt-safe">
       <h1 className="text-2xl font-bold">{data.name}</h1>
       <div className="mt-0.5 text-sm text-muted">
         #{data.number ?? "—"} · {data.pos}
@@ -48,7 +48,7 @@ export default function PlayerPage({
           No stats this season.
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
           {seasonEntries.map(([label, value]) => (
             <div key={label} className="rounded-xl bg-surface p-3 text-center">
               <div className="text-lg font-bold tabular-nums">{value}</div>

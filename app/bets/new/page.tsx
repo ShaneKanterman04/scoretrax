@@ -57,15 +57,15 @@ export default function NewBetPage() {
   const combined = combinedProb(legs.map((l) => l.entryProb));
 
   return (
-    <main className="px-4 pt-safe pb-20">
+    <main className="mx-auto max-w-3xl px-4 pt-safe pb-20">
       <h1 className="pb-1 text-2xl font-bold">New Bet</h1>
       <DateNav date={date} onChange={setDate} />
-      <div className="mt-2 flex flex-col gap-2">
+      <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
         {isLoading && !data && (
-          <div className="py-16 text-center text-sm text-muted">Loading games…</div>
+          <div className="py-16 text-center text-sm text-muted sm:col-span-2">Loading games…</div>
         )}
         {data && games.length === 0 && (
-          <div className="py-16 text-center text-sm text-muted">
+          <div className="py-16 text-center text-sm text-muted sm:col-span-2">
             No games on this date.
           </div>
         )}
@@ -79,11 +79,8 @@ export default function NewBetPage() {
         ))}
       </div>
       {legs.length > 0 && (
-        <div
-          className="fixed inset-x-0 z-40 border-t border-edge bg-surface/95 backdrop-blur"
-          style={{ bottom: "calc(3.5rem + env(safe-area-inset-bottom))" }}
-        >
-          <div className="mx-auto flex max-w-lg items-center justify-between gap-3 px-4 py-3">
+        <div className="fixed inset-x-0 bottom-[calc(3.5rem_+_env(safe-area-inset-bottom))] z-40 border-t border-edge bg-surface/95 backdrop-blur lg:bottom-0 lg:pl-56">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
             <span className="text-sm font-semibold">
               {legs.length} leg{legs.length > 1 ? "s" : ""}
               {combined !== undefined && (
